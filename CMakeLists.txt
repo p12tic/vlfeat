@@ -185,3 +185,13 @@ install(EXPORT vlfeatTargets
   NAMESPACE vlfeat::
   DESTINATION "${INSTALL_CMAKE_DIR}"
 )
+
+include(CMakePackageConfigHelpers)
+
+set(version_config "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake")
+
+write_basic_package_version_file("${version_config}"
+                                 COMPATIBILITY SameMajorVersion)
+
+install(FILES ${version_config}
+        DESTINATION "${INSTALL_CMAKE_DIR}")
