@@ -25,6 +25,10 @@
 cmake_minimum_required (VERSION 3.10)
 project (vlfeat LANGUAGES C VERSION 0.9.21)
 
+option(VLFEAT_ENABLE_OPENMP "Enable OpenMP optimization" ON)
+option(VLFEAT_USE_SSE "Enable SSE optimizations" ON)
+option(VLFEAT_USE_AVX "Enable AVX optimization" ON)
+
 include(GNUInstallDirs)
 set(INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
 set(INSTALL_CMAKE_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
@@ -39,11 +43,11 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
-if(ENABLE_OPENMP)
+if(VLFEAT_ENABLE_OPENMP)
   find_package(OpenMP REQUIRED)
 endif()
 
-if(USE_SSE)
+if(VLFEAT_USE_SSE)
   set(SSE2_DEFINITIONS -D__SSE2__)
   set(SSE2_VL_C_FILES "vl/mathop_sse2.c" "vl/imopv_sse2.c")
   set(SSE2_VL_H_FILES "vl/mathop_sse2.h" "vl/imopv_sse2.h")
@@ -51,7 +55,7 @@ else()
   set(SSE2_DEFINITIONS -DVL_DISABLE_SSE2)
 endif()
 
-if(USE_AVX)
+if(VLFEAT_USE_AVX)
   set(AVX_VL_C_FILES "vl/mathop_avx.c")
   set(AVX_VL_H_FILES "vl/mathop_avx.h")
 else()
@@ -156,7 +160,9 @@ if(CMAKE_COMPILER_IS_GNUCC)
     )
 endif()
 
-target_compile_options(vl PRIVATE ${OpenMP_C_FLAGS})
+if(VLFEAT_ENABLE_OPENMP)
+    target_link_libraries(vl PRIVATE OpenMP::OpenMP_C)
+endif()
 
 target_compile_definitions(vl PRIVATE
     -DVL_BUILD_DLL
