@@ -41,36 +41,21 @@ endif()
 
 if(ENABLE_OPENMP)
   find_package(OpenMP REQUIRED)
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-endif()
-
-if(MSVC)
-  add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
-  add_definitions(-D__LITTLE_ENDIAN__)
-  add_definitions(/Zp8)
-  add_definitions(/wd4146)
-endif()
-
-if(CMAKE_COMPILER_IS_GNUCC)
-  add_definitions(-std=c99)
-  add_definitions(-Wno-unused-function)
-  add_definitions(-Wno-long-long)
-  add_definitions(-Wno-variadic-macros)
 endif()
 
 if(USE_SSE)
-  add_definitions(-D__SSE2__)
+  set(SSE2_DEFINITIONS -D__SSE2__)
   set(SSE2_VL_C_FILES "vl/mathop_sse2.c" "vl/imopv_sse2.c")
   set(SSE2_VL_H_FILES "vl/mathop_sse2.h" "vl/imopv_sse2.h")
 else()
-  add_definitions(-DVL_DISABLE_SSE2)
+  set(SSE2_DEFINITIONS -DVL_DISABLE_SSE2)
 endif()
 
 if(USE_AVX)
   set(AVX_VL_C_FILES "vl/mathop_avx.c")
   set(AVX_VL_H_FILES "vl/mathop_avx.h")
 else()
-  add_definitions(-DVL_DISABLE_AVX)
+  set(AVX_DEFINITIONS -DVL_DISABLE_AVX)
 endif()
 
 
@@ -151,8 +136,34 @@ set (H_SOURCES
 
 add_library(vl ${C_SOURCES} ${H_SOURCES})
 set_property(TARGET vl PROPERTY POSITION_INDEPENDENT_CODE ON)
-target_compile_definitions(vl PRIVATE -DVL_BUILD_DLL)
 target_include_directories(vl PUBLIC $<INSTALL_INTERFACE:${INSTALL_INCLUDE_DIR}> $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vl>)
+
+if(MSVC)
+    target_compile_options(vl PRIVATE
+        -D_CRT_SECURE_NO_DEPRECATE
+        -D__LITTLE_ENDIAN__
+        /Zp8
+        /wd4146
+    )
+endif()
+
+if(CMAKE_COMPILER_IS_GNUCC)
+    target_compile_options(vl PRIVATE
+        -std=c99
+        -Wno-unused-function
+        -Wno-long-long
+        -Wno-variadic-macros
+    )
+endif()
+
+target_compile_options(vl PRIVATE ${OpenMP_C_FLAGS})
+
+target_compile_definitions(vl PRIVATE
+    -DVL_BUILD_DLL
+    ${SSE2_DEFINITIONS}
+    ${AVX_DEFINITIONS}
+)
+
 set_target_properties(vl PROPERTIES PUBLIC_HEADER "${H_SOURCES}")
 
 install(TARGETS vl EXPORT vlfeatTargets
