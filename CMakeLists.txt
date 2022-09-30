@@ -25,7 +25,7 @@
 cmake_minimum_required (VERSION 3.10)
 project (vlfeat LANGUAGES C VERSION 0.9.21)
 
-option(VLFEAT_ENABLE_OPENMP "Enable OpenMP optimization" ON)
+option(VLFEAT_ENABLE_OPENMP "Enable OpenMP optimization" OFF)
 option(VLFEAT_USE_SSE "Enable SSE optimizations" ON)
 option(VLFEAT_USE_AVX "Enable AVX optimization" ON)
 
