@@ -25,19 +25,9 @@
 cmake_minimum_required (VERSION 3.10)
 project (vlfeat)
 
-set(INSTALL_BIN_DIR      "bin"                      CACHE PATH "Path where exe and dll will be installed")
-set(INSTALL_LIB_DIR      "lib"                      CACHE PATH "Path where lib will be installed")
-set(INSTALL_INCLUDE_DIR  "include/vlfeat"           CACHE PATH "Path where headers will be installed")
-set(INSTALL_CMAKE_DIR    "share/vlfeat"             CACHE PATH "Path where cmake configs will be installed")
-
-# Make relative paths absolute (needed later on)
-set(RELATIVE_INSTALL_INCLUDE_DIR ${INSTALL_INCLUDE_DIR})
-foreach(p LIB BIN INCLUDE CMAKE)
-  set(var INSTALL_${p}_DIR)
-  if(NOT IS_ABSOLUTE "${${var}}")
-    set(${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
-  endif()
-endforeach()
+include(GNUInstallDirs)
+set(INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
+set(INSTALL_CMAKE_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
 
 # make sure that the default is a RELEASE
 set(default_build_type "Release")
@@ -165,19 +155,19 @@ set (H_SOURCES
 add_library(vl ${C_SOURCES} ${H_SOURCES})
 set_property(TARGET vl PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_compile_definitions(vl PRIVATE -DVL_BUILD_DLL)
-target_include_directories(vl PUBLIC $<INSTALL_INTERFACE:${RELATIVE_INSTALL_INCLUDE_DIR}> $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vl>)
+target_include_directories(vl PUBLIC $<INSTALL_INTERFACE:${INSTALL_INCLUDE_DIR}> $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vl>)
 set_target_properties(vl PROPERTIES PUBLIC_HEADER "${H_SOURCES}")
 
 install(TARGETS vl EXPORT vlfeatTargets
-  RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
-  LIBRARY DESTINATION "${INSTALL_LIB_DIR}"
-  ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
   PUBLIC_HEADER DESTINATION "${INSTALL_INCLUDE_DIR}"
   COMPONENT dev
 )
 
 install(EXPORT vlfeatTargets
   FILE vlfeatConfig.cmake
-  NAMESPACE unofficial::vlfeat::
+  NAMESPACE vlfeat::
   DESTINATION "${INSTALL_CMAKE_DIR}"
 )
