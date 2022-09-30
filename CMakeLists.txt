@@ -23,7 +23,7 @@
 # SOFTWARE.
 
 cmake_minimum_required (VERSION 3.10)
-project (vlfeat)
+project (vlfeat LANGUAGES C VERSION 0.9.21)
 
 include(GNUInstallDirs)
 set(INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
